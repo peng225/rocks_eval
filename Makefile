@@ -18,15 +18,16 @@ DEPS = $(OBJS:.o=.d)
 
 INCLUDE = -I $(INC_DIR) -I $(ROCKS_INC_DIR)
 
-ROCKSDBLIB = $(ROCKS_DIR)/build/librocksdb.a
+ROCKSDB_LIB = $(ROCKS_DIR)/build/librocksdb.a
+ROCKSDB_TOOLS = tools
 
 CC = g++
 
-all: $(TARGET)
+all: $(TARGET) $(ROCKSDB_TOOLS)
 
 -include $(DEPS)
 
-$(TARGET): $(OBJS) $(ROCKSDBLIB)
+$(TARGET): $(OBJS) $(ROCKSDB_LIB)
 	$(CC) $(INCLUDE) -L $(ROCKS_DIR)/build -o $@ $^ $(FINAL_CFLAGS) $(LDLIBS)
 
 
@@ -34,12 +35,15 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@if [ ! -e $(OBJ_DIR) ] ; then mkdir $(OBJ_DIR) ; fi
 	$(CC) $(INCLUDE) -o $@ $< $(CFLAGS) $(LDLIBS)
 
-$(ROCKSDBLIB):
-	cd src/rocksdb && mkdir -p build && cd build \
+$(ROCKSDB_LIB):
+	cd src/rocksdb && mkdir -p build && cd build && \
 	cmake .. && make -j4
 
+$(ROCKSDB_TOOLS): $(ROCKSDB_LIB)
+	ln -s $(ROCKS_DIR)/build/tools $@
+
 clean:
-	rm -f $(TARGET) $(OBJ_DIR)/* $(SRC_DIR)/*~ $(INC_DIR)/*~ ./*~
-	rm -f $(ROCKS_DIR)/build
+	rm -f $(TARGET) $(OBJ_DIR)/* $(SRC_DIR)/*~ $(INC_DIR)/*~ ./*~ $(ROCKSDB_TOOLS)
+	rm -rf $(ROCKS_DIR)/build
 
 .PHONY: all clean

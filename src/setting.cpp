@@ -6,19 +6,22 @@ std::ostream &operator<<(std::ostream &os, const Operation &ope)
     switch (ope)
     {
     case Operation::WRITE:
-        os << "WRITE";
+        os << "write";
         break;
     case Operation::READ:
-        os << "READ";
+        os << "read";
         break;
-    case Operation::READ_RANGE:
-        os << "READ_RANGE";
+    case Operation::PREFIX_SEEK:
+        os << "prefix_seek";
         break;
     case Operation::DELETE:
-        os << "DELETE";
+        os << "delete";
         break;
     case Operation::DELETE_RANGE:
-        os << "DELETE_RANGE";
+        os << "delee_range";
+        break;
+    case Operation::COMPACTION:
+        os << "compaction";
         break;
     default:
         os << "UNKNOWN (" << static_cast<int>(ope) << ")";

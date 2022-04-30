@@ -2,6 +2,7 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <cstdlib>
+#include <unordered_map>
 
 void parseArgs(int argc, char **argv, TestSetting &setting)
 {
@@ -59,11 +60,12 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     if (vm.count("operation"))
     {
         std::unordered_map<std::string, Operation> strToOpe = {
-            {"WRITE", Operation::WRITE},
-            {"READ", Operation::READ},
-            {"READ_RANGE", Operation::READ_RANGE},
-            {"DELETE", Operation::DELETE},
-            {"DELETE_RANGE", Operation::DELETE_RANGE}};
+            {"write", Operation::WRITE},
+            {"read", Operation::READ},
+            {"prefix_seek", Operation::PREFIX_SEEK},
+            {"delete", Operation::DELETE},
+            {"delete_range", Operation::DELETE_RANGE},
+            {"compaction", Operation::COMPACTION}};
         std::string ope;
         try
         {
@@ -97,7 +99,6 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
 
     if (vm.count("cos"))
     {
-        std::cout << "cos" << std::endl;
         setting.clearOnStart = true;
     }
 }

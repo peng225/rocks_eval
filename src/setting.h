@@ -13,9 +13,10 @@ enum class Operation
 {
     WRITE = 0,
     READ,
-    READ_RANGE,
+    PREFIX_SEEK,
     DELETE,
-    DELETE_RANGE
+    DELETE_RANGE,
+    COMPACTION
 };
 
 std::ostream &operator<<(std::ostream &os, const Operation &ope);
@@ -24,6 +25,7 @@ typedef struct TestSetting
 {
     // RocksDB options
     int numColumnFamily = 1;
+    // TODO: file num and size of each level
 
     // Run settings
     std::string dbPath = "test";
@@ -33,7 +35,7 @@ typedef struct TestSetting
     // Table settings
     int numKeyGroup = 1;
     int numEntryPerKeyGroup = 1000;
-    int valueLength = 128;
+    int valueLength = 32;
     WritePattern writePattern = WritePattern::RANDOM;
 } TestSetting;
 
