@@ -107,7 +107,12 @@ void DBTest::runTest()
         read_options.auto_prefix_mode = false;
         rocksdb::Iterator *iter = db_->NewIterator(read_options);
         iter->Seek("key00000/000000000100");
+        if(!iter->Valid()) {
+            std::cerr << "The iterator is not valid." << std::endl;
+            exit(1);
+        }
         std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
+        delete iter;
         break;
     }
     case Operation::DELETE:
@@ -150,7 +155,7 @@ void DBTest::runTest()
     auto end = std::chrono::system_clock::now();
     std::cout << "Operation " << setting_.operation << " finished." << std::endl;
     double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "elapsed time: " << elapsed/1000.0 << std::endl;
+    std::cout << "elapsed time: " << elapsed/1000.0 << "[ms]" << std::endl;
 }
 
 std::string DBTest::getCfName(int cfNum)
