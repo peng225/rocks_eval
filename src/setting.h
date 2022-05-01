@@ -3,7 +3,7 @@
 
 #include <string>
 
-enum class WritePattern
+enum class IOPattern
 {
     RANDOM = 0,
     SEQUENTIAL
@@ -30,13 +30,15 @@ typedef struct TestSetting
     // Run settings
     std::string dbPath = "test";
     bool clearOnStart = false;
+    bool allowNotFound = false;
     Operation operation = Operation::WRITE;
 
     // Table settings
     int numKeyGroup = 1;
     int numEntryPerKeyGroup = 1000;
     int valueLength = 32;
-    WritePattern writePattern = WritePattern::RANDOM;
+    IOPattern writePattern = IOPattern::RANDOM;
+    // How about ReadPattern?
 } TestSetting;
 
 #endif // SETTING_H

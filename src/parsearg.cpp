@@ -12,7 +12,10 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     ("epg", boost::program_options::value<int>(), "The number of entries to be written per key group.")
     ("operation,o", boost::program_options::value<std::string>(), "The operation to be executed.")
     ("numcf", boost::program_options::value<int>(), "The number of column families.")
-    ("cos", "Clear on start.");
+    ("numkg", boost::program_options::value<int>(), "The number of key groups.")
+    ("clear_on_start", "Clear on start.")
+    ("allow_not_found", "Allow 'not found' error on read.");
+    // TODO: set writePattern
     boost::program_options::variables_map vm;
     try
     {
@@ -97,8 +100,26 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
         }
     }
 
-    if (vm.count("cos"))
+    if (vm.count("numkg"))
+    {
+        try
+        {
+            setting.numKeyGroup = vm["numkg"].as<int>();
+        }
+        catch (const boost::bad_any_cast &e)
+        {
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+    }
+
+    if (vm.count("clear_on_start"))
     {
         setting.clearOnStart = true;
+    }
+
+    if (vm.count("allow_not_found"))
+    {
+        setting.allowNotFound = true;
     }
 }

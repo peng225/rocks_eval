@@ -4,6 +4,9 @@
 #include <iostream>
 #include <chrono>
 
+const std::string MIN_KEY = "key";
+const std::string MAX_KEY = "key:";
+
 DBTest::DBTest(const TestSetting &setting) :
     setting_(setting),
     // Use 0 as a fixed seed to generate the same result
@@ -35,9 +38,10 @@ void DBTest::setUp()
 
 void DBTest::cleanUp()
 {
-    for (int i = 0; i < static_cast<int>(handles_.size()) - 1; i++)
+    // i==0 is default column family
+    for (int i = 1; i < static_cast<int>(handles_.size()); i++)
     {
-        auto s = db_->DropColumnFamily(handles_[i + 1]);
+        auto s = db_->DropColumnFamily(handles_[i]);
         if (!s.ok())
         {
             std::cerr << s.ToString() << std::endl;
@@ -65,6 +69,8 @@ void DBTest::runTest()
     // rocksdb::WriteOptions wop();
     // rocksdb::ReadOptions rop();
 
+    // TODO: Stop background compaction during test
+
     std::cout << "Operation " << setting_.operation << " start." << std::endl;
     auto start = std::chrono::system_clock::now();
     switch (setting_.operation)
@@ -87,13 +93,23 @@ void DBTest::runTest()
             s = db_->Get(rocksdb::ReadOptions(), handles_.at(location.cfNum), location.key, &value);
             if (!s.ok())
             {
-                std::cerr << s.ToString() << std::endl;
-                exit(1);
+                if(!setting_.allowNotFound || !s.IsNotFound()) {
+                    std::cerr << s.ToString() << std::endl;
+                    exit(1);
+                }
             }
         }
         break;
     case Operation::PREFIX_SEEK:
+    {
+        rocksdb::ReadOptions read_options;
+        read_options.total_order_seek = false;
+        read_options.auto_prefix_mode = false;
+        rocksdb::Iterator *iter = db_->NewIterator(read_options);
+        iter->Seek("key00000/000000000100");
+        std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
         break;
+    }
     case Operation::DELETE:
         for (const auto &location : locations)
         {
@@ -106,12 +122,24 @@ void DBTest::runTest()
         }
         break;
     case Operation::DELETE_RANGE:
+    {
+        rocksdb::Slice begin(MIN_KEY);
+        rocksdb::Slice end(MAX_KEY);
+        for(auto &handle : handles_) {
+            s = db_->DeleteRange(rocksdb::WriteOptions(), handle, begin, end);
+            if (!s.ok())
+            {
+                std::cerr << s.ToString() << std::endl;
+                exit(1);
+            }
+        }
         break;
+    }
     case Operation::COMPACTION:
     {
         rocksdb::CompactRangeOptions cop;
-        rocksdb::Slice begin("key00000");
-        rocksdb::Slice end("key99999");
+        rocksdb::Slice begin(MIN_KEY);
+        rocksdb::Slice end(MAX_KEY);
         s = db_->CompactRange(cop, &begin, &end);
         break;
     }
