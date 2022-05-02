@@ -25,7 +25,7 @@ typedef struct TestSetting
 {
     // RocksDB options
     int numColumnFamily = 1;
-    // TODO: file num and size of each level
+    bool smallSet = false;
 
     // Run settings
     std::string dbPath = "test";

@@ -18,12 +18,19 @@ DBTest::DBTest(const TestSetting &setting) :
 void DBTest::setUp()
 {
     std::vector<rocksdb::ColumnFamilyDescriptor> columnFamilies;
+    rocksdb::ColumnFamilyOptions cfopt;
+    if(setting_.smallSet) {
+        // For cf options, see https://github.com/facebook/rocksdb/wiki/Leveled-Compaction#levels-target-size
+        cfopt.write_buffer_size = 10 * 1024;
+        cfopt.max_bytes_for_level_base = 20 * 1024;
+        cfopt.max_bytes_for_level_multiplier = 2;
+    }
     columnFamilies.emplace_back(rocksdb::ColumnFamilyDescriptor(
-        rocksdb::kDefaultColumnFamilyName, rocksdb::ColumnFamilyOptions()));
+        rocksdb::kDefaultColumnFamilyName, cfopt));
     for (int cfNum = 0; cfNum < setting_.numColumnFamily - 1; cfNum++)
     {
         columnFamilies.emplace_back(rocksdb::ColumnFamilyDescriptor(
-            getCfName(cfNum), rocksdb::ColumnFamilyOptions()));
+            getCfName(cfNum), cfopt));
     }
 
     rocksdb::Options options;

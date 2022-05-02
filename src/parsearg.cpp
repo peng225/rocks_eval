@@ -14,7 +14,8 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     ("numcf", boost::program_options::value<int>(), "The number of column families.")
     ("numkg", boost::program_options::value<int>(), "The number of key groups.")
     ("clear_on_start", "Clear on start.")
-    ("allow_not_found", "Allow 'not found' error on read.");
+    ("allow_not_found", "Allow 'not found' error on read.")
+    ("small_set", "Use small rocksdb settings.");
     // TODO: set writePattern
     boost::program_options::variables_map vm;
     try
@@ -121,5 +122,10 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     if (vm.count("allow_not_found"))
     {
         setting.allowNotFound = true;
+    }
+
+    if (vm.count("small_set"))
+    {
+        setting.smallSet = true;
     }
 }
