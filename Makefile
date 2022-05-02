@@ -35,15 +35,17 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@if [ ! -e $(OBJ_DIR) ] ; then mkdir $(OBJ_DIR) ; fi
 	$(CC) $(INCLUDE) -o $@ $< $(CFLAGS) $(LDLIBS)
 
-$(ROCKSDB_LIB):
+rocksdb:
 	cd src/rocksdb && mkdir -p build && cd build && \
-	cmake .. && make -j4
+	cmake --DWITH_TESTS=off .. && make -j4
 
-$(ROCKSDB_TOOLS): $(ROCKSDB_LIB)
-	ln -s $(ROCKS_DIR)/build/tools $@
+$(ROCKSDB_LIB): rocksdb
+
+$(ROCKSDB_TOOLS): rocksdb
+	ln -sf $(ROCKS_DIR)/build/tools $@
 
 clean:
 	rm -f $(TARGET) $(OBJ_DIR)/* $(SRC_DIR)/*~ $(INC_DIR)/*~ ./*~ $(ROCKSDB_TOOLS)
 	rm -rf $(ROCKS_DIR)/build
 
-.PHONY: all clean
+.PHONY: all clean rocksdb
