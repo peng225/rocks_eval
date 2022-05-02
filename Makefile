@@ -37,7 +37,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 rocksdb:
 	cd src/rocksdb && mkdir -p build && cd build && \
-	cmake --DWITH_TESTS=off .. && make -j4
+	cmake -DWITH_TESTS=off .. && make -j4
 
 $(ROCKSDB_LIB): rocksdb
 
