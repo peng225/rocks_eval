@@ -1,11 +1,21 @@
 #include "location_handler.h"
 #include <iomanip>
 
+const std::string LocationHandler::MIN_KEY = "key";
+const std::string LocationHandler::MAX_KEY = "key:";
+
 LocationHandler::LocationHandler(const TestSetting &setting) :
     setting_(setting),
     currentKg_(0),
     numEntryInKg_(0)
 {
+}
+
+std::string LocationHandler::getKeyPrefix(int kg)
+{
+    std::stringstream keyPrefix;
+    keyPrefix << "key" << std::setfill('0') << std::setw(5) << kg << "/";
+    return keyPrefix.str();
 }
 
 std::shared_ptr<Location> LocationHandler::getNextLocation()

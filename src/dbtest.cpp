@@ -4,8 +4,6 @@
 #include <iostream>
 #include <chrono>
 
-const std::string MIN_KEY = "key";
-const std::string MAX_KEY = "key:";
 
 DBTest::DBTest(const TestSetting &setting) :
     setting_(setting),
@@ -121,9 +119,7 @@ void DBTest::run()
         rocksdb::Iterator *iter = db_->NewIterator(read_options);
         for (int kg = 0; kg < setting_.numKeyGroup; kg++)
         {
-            std::stringstream keyPrefix;
-            keyPrefix << "key" << std::setfill('0') << std::setw(5) << kg << "/";
-            iter->Seek(keyPrefix.str());
+            iter->Seek(lh->getKeyPrefix(kg));
         }
         if(!iter->Valid()) {
             std::cerr << "The iterator is not valid." << std::endl;
@@ -135,8 +131,8 @@ void DBTest::run()
     }
     case Operation::DELETE_RANGE:
     {
-        rocksdb::Slice begin(MIN_KEY);
-        rocksdb::Slice end(MAX_KEY);
+        rocksdb::Slice begin(LocationHandler::MIN_KEY);
+        rocksdb::Slice end(LocationHandler::MAX_KEY);
         for(auto &handle : handles_) {
             s = db_->DeleteRange(rocksdb::WriteOptions(), handle, begin, end);
             if (!s.ok())
