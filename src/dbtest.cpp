@@ -68,24 +68,22 @@ void DBTest::cleanUp()
     delete db_;
 }
 
-void DBTest::runTest()
+void DBTest::run()
 {
     std::string value;
-    std::vector<Location> locations;
-    generateLocations(locations);
+    auto lh = std::make_shared<LocationHandler>(setting_);
     rocksdb::Status s;
-    // rocksdb::WriteOptions wop();
-    // rocksdb::ReadOptions rop();
 
     std::cout << "Operation " << setting_.operation << " start." << std::endl;
     auto start = std::chrono::system_clock::now();
     switch (setting_.operation)
     {
     case Operation::WRITE:
-        for (const auto &location : locations)
+        for(int i = 0; i < setting_.numKeyGroup * setting_.numEntryPerKeyGroup; i++)
         {
+			auto location = lh->getNextLocation();
             generateValue(value);
-            s = db_->Put(rocksdb::WriteOptions(), handles_.at(location.cfNum), location.key, value);
+            s = db_->Put(rocksdb::WriteOptions(), handles_.at(location->cfNum), location->key, value);
             if (!s.ok())
             {
                 std::cerr << s.ToString() << std::endl;
@@ -94,18 +92,27 @@ void DBTest::runTest()
         }
         break;
     case Operation::READ:
-        for (const auto &location : locations)
-        {
-            s = db_->Get(rocksdb::ReadOptions(), handles_.at(location.cfNum), location.key, &value);
-            if (!s.ok())
-            {
-                if(!setting_.allowNotFound || !s.IsNotFound()) {
-                    std::cerr << s.ToString() << std::endl;
-                    exit(1);
-                }
-            }
-        }
+	{
+		rocksdb::ReadOptions read_options;
+		std::vector<rocksdb::Iterator*> iters;
+		db_->NewIterators(read_options, handles_, &iters);
+		int readCount = 0;
+		for(auto iter : iters) {
+			for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
+				auto val = iter->value();
+				std::cout << val.data() << std::endl;
+				readCount++;
+			}
+			std::cout << readCount << " entries were read." << std::endl;
+			if (!iter->status().ok()) {
+  				std::cerr << "READ failed. " << iter->status().ToString() << std::endl;
+			}
+		}
+		for(auto iter : iters) {
+			delete iter;
+		}
         break;
+	}
     case Operation::PREFIX_SEEK:
     {
         rocksdb::ReadOptions read_options;
@@ -126,17 +133,6 @@ void DBTest::runTest()
         delete iter;
         break;
     }
-    case Operation::DELETE:
-        for (const auto &location : locations)
-        {
-            s = db_->Delete(rocksdb::WriteOptions(), handles_.at(location.cfNum), location.key);
-            if (!s.ok())
-            {
-                std::cerr << s.ToString() << std::endl;
-                exit(1);
-            }
-        }
-        break;
     case Operation::DELETE_RANGE:
     {
         rocksdb::Slice begin(MIN_KEY);
@@ -154,9 +150,7 @@ void DBTest::runTest()
     case Operation::COMPACTION:
     {
         rocksdb::CompactRangeOptions cropt;
-        rocksdb::Slice begin(MIN_KEY);
-        rocksdb::Slice end(MAX_KEY);
-        s = db_->CompactRange(cropt, &begin, &end);
+        s = db_->CompactRange(cropt, nullptr, nullptr);
         break;
     }
     default:
@@ -172,23 +166,6 @@ void DBTest::runTest()
 std::string DBTest::getCfName(int cfNum)
 {
     return "cf" + std::to_string(cfNum);
-}
-
-// TODO: generating location info in memory is not good when the data size is large.
-//       Instead, on-demand locatoin info generator is better.
-void DBTest::generateLocations(std::vector<Location> &locations)
-{
-    for (int kg = 0; kg < setting_.numKeyGroup; kg++)
-    {
-        std::stringstream keyPrefix;
-        keyPrefix << "key" << std::setfill('0') << std::setw(5) << kg << "/";
-        for (int i = 0; i < setting_.numEntryPerKeyGroup; i++)
-        {
-            std::stringstream keyBody;
-            keyBody << std::setfill('0') << std::setw(12) << i;
-            locations.emplace_back(Location(i % setting_.numColumnFamily, keyPrefix.str() + keyBody.str()));
-        }
-    }
 }
 
 void DBTest::generateValue(std::string &value)

@@ -2,7 +2,7 @@
 #define DBTEST_H
 
 #include "setting.h"
-#include "location.h"
+#include "location_handler.h"
 #include <rocksdb/db.h>
 #include <string>
 #include <random>
@@ -12,7 +12,7 @@ public:
     explicit DBTest(const TestSetting &setting);
     void setUp();
     void cleanUp();
-    void runTest();
+    void run();
 private:
     rocksdb::DB *db_;
     std::vector<rocksdb::ColumnFamilyHandle *> handles_;

@@ -1,6 +1,8 @@
 #ifndef LOCATION_H
 #define LOCATION_H
 
+#include <string>
+
 typedef struct Location
 {
     int cfNum;

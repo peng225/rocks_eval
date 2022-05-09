@@ -14,9 +14,6 @@ std::ostream &operator<<(std::ostream &os, const Operation &ope)
     case Operation::PREFIX_SEEK:
         os << "prefix_seek";
         break;
-    case Operation::DELETE:
-        os << "delete";
-        break;
     case Operation::DELETE_RANGE:
         os << "delee_range";
         break;

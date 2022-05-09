@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 
     auto dbtest = std::make_shared<DBTest>(setting);
     dbtest->setUp();
-    dbtest->runTest();
+    dbtest->run();
     dbtest->cleanUp();
 
     return 0;
