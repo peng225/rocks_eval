@@ -81,7 +81,7 @@ void DBTest::run()
     case Operation::WRITE:
         for(int i = 0; i < setting_.numKeyGroup * setting_.numEntryPerKeyGroup; i++)
         {
-			auto location = lh->getNextLocation();
+            auto location = lh->getNextLocation();
             generateValue(value);
             s = db_->Put(rocksdb::WriteOptions(), handles_.at(location->cfNum), location->key, value);
             if (!s.ok())
@@ -92,27 +92,27 @@ void DBTest::run()
         }
         break;
     case Operation::READ:
-	{
-		rocksdb::ReadOptions read_options;
-		std::vector<rocksdb::Iterator*> iters;
-		db_->NewIterators(read_options, handles_, &iters);
-		int readCount = 0;
-		for(auto iter : iters) {
-			for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
-				auto val = iter->value();
-				std::cout << val.data() << std::endl;
-				readCount++;
-			}
-			std::cout << readCount << " entries were read." << std::endl;
-			if (!iter->status().ok()) {
-  				std::cerr << "READ failed. " << iter->status().ToString() << std::endl;
-			}
-		}
-		for(auto iter : iters) {
-			delete iter;
-		}
+    {
+        rocksdb::ReadOptions read_options;
+        std::vector<rocksdb::Iterator*> iters;
+        db_->NewIterators(read_options, handles_, &iters);
+        int readCount = 0;
+        for(auto iter : iters) {
+            for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
+                auto val = iter->value();
+                std::cout << val.data() << std::endl;
+                readCount++;
+            }
+            std::cout << readCount << " entries were read." << std::endl;
+            if (!iter->status().ok()) {
+                  std::cerr << "READ failed. " << iter->status().ToString() << std::endl;
+            }
+        }
+        for(auto iter : iters) {
+            delete iter;
+        }
         break;
-	}
+    }
     case Operation::PREFIX_SEEK:
     {
         rocksdb::ReadOptions read_options;
