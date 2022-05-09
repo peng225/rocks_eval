@@ -85,6 +85,9 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
             exit(1);
         }
         setting.operation = strToOpe[ope];
+    } else {
+            std::cerr << "-o/--operation option is required." << std::endl;
+            exit(1);
     }
 
     if (vm.count("numcf"))
