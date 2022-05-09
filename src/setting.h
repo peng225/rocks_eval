@@ -38,7 +38,7 @@ typedef struct TestSetting
     int numEntryPerKeyGroup = 1000;
     int valueLength = 32;
     IOPattern writePattern = IOPattern::RANDOM;
-    // How about ReadPattern?
+    //TODO:  How about ReadPattern?
 } TestSetting;
 
 #endif // SETTING_H

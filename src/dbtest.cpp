@@ -24,6 +24,7 @@ void DBTest::setUp()
         cfopt.write_buffer_size = 10 * 1024;
         cfopt.max_bytes_for_level_base = 20 * 1024;
         cfopt.max_bytes_for_level_multiplier = 2;
+        cfopt.num_levels = 4;
     }
     columnFamilies.emplace_back(rocksdb::ColumnFamilyDescriptor(
         rocksdb::kDefaultColumnFamilyName, cfopt));
@@ -76,8 +77,6 @@ void DBTest::runTest()
     // rocksdb::WriteOptions wop();
     // rocksdb::ReadOptions rop();
 
-    // TODO: Stop background compaction during test
-
     std::cout << "Operation " << setting_.operation << " start." << std::endl;
     auto start = std::chrono::system_clock::now();
     switch (setting_.operation)
@@ -113,12 +112,17 @@ void DBTest::runTest()
         read_options.total_order_seek = false;
         read_options.auto_prefix_mode = false;
         rocksdb::Iterator *iter = db_->NewIterator(read_options);
-        iter->Seek("key00000/000000000100");
+        for (int kg = 0; kg < setting_.numKeyGroup; kg++)
+        {
+            std::stringstream keyPrefix;
+            keyPrefix << "key" << std::setfill('0') << std::setw(5) << kg << "/";
+            iter->Seek(keyPrefix.str());
+        }
         if(!iter->Valid()) {
             std::cerr << "The iterator is not valid." << std::endl;
             exit(1);
         }
-        std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
+        // std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
         delete iter;
         break;
     }
@@ -149,10 +153,10 @@ void DBTest::runTest()
     }
     case Operation::COMPACTION:
     {
-        rocksdb::CompactRangeOptions cop;
+        rocksdb::CompactRangeOptions cropt;
         rocksdb::Slice begin(MIN_KEY);
         rocksdb::Slice end(MAX_KEY);
-        s = db_->CompactRange(cop, &begin, &end);
+        s = db_->CompactRange(cropt, &begin, &end);
         break;
     }
     default:
