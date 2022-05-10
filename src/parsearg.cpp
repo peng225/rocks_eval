@@ -67,6 +67,7 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
             {"write", Operation::WRITE},
             {"read", Operation::READ},
             {"prefix_seek", Operation::PREFIX_SEEK},
+            {"delete", Operation::DELETE},
             {"delete_range", Operation::DELETE_RANGE},
             {"compaction", Operation::COMPACTION}};
         std::string ope;

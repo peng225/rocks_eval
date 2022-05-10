@@ -14,6 +14,7 @@ enum class Operation
     WRITE = 0,
     READ,
     PREFIX_SEEK,
+    DELETE,
     DELETE_RANGE,
     COMPACTION
 };

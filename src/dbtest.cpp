@@ -97,8 +97,7 @@ void DBTest::run()
         int readCount = 0;
         for(auto iter : iters) {
             for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
-                auto val = iter->value();
-                std::cout << val.data() << std::endl;
+                volatile auto val = iter->value();
                 readCount++;
             }
             std::cout << readCount << " entries were read." << std::endl;
@@ -116,7 +115,7 @@ void DBTest::run()
         rocksdb::ReadOptions read_options;
         read_options.total_order_seek = false;
         read_options.auto_prefix_mode = false;
-        rocksdb::Iterator *iter = db_->NewIterator(read_options);
+        rocksdb::Iterator* iter = db_->NewIterator(read_options);
         for (int kg = 0; kg < setting_.numKeyGroup; kg++)
         {
             iter->Seek(lh->getKeyPrefix(kg));
@@ -127,6 +126,28 @@ void DBTest::run()
         }
         // std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
         delete iter;
+        break;
+    }
+    case Operation::DELETE:
+    {
+        rocksdb::Slice begin(LocationHandler::MIN_KEY);
+        rocksdb::Slice end(LocationHandler::MAX_KEY);
+        std::vector<rocksdb::Iterator*> iters;
+        db_->NewIterators(rocksdb::ReadOptions(), handles_, &iters);
+        int deleteCount = 0;
+        for(auto iter : iters) {
+            for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
+                db_->Delete(rocksdb::WriteOptions(), iter->key());
+                deleteCount++;
+            }
+            std::cout << deleteCount << " entries were deleted." << std::endl;
+            if (!iter->status().ok()) {
+                  std::cerr << "DELETE failed. " << iter->status().ToString() << std::endl;
+            }
+        }
+        for(auto iter : iters) {
+            delete iter;
+        }
         break;
     }
     case Operation::DELETE_RANGE:
