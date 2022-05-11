@@ -90,8 +90,8 @@ void DBTest::run()
         rocksdb::ReadOptions read_options;
         std::vector<rocksdb::Iterator*> iters;
         db_->NewIterators(read_options, handles_, &iters);
-        int readCount = 0;
         for(auto iter : iters) {
+            int readCount = 0;
             for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
                 volatile auto val = iter->value();
                 if(setting_.verbose) {
@@ -99,7 +99,9 @@ void DBTest::run()
                 }
                 readCount++;
             }
-            std::cout << readCount << " entries were read." << std::endl;
+            if(setting_.verbose) {
+                std::cout << readCount << " entries were read." << std::endl;
+            }
             if (!iter->status().ok()) {
                   std::cerr << "READ failed. " << iter->status().ToString() << std::endl;
             }
@@ -148,13 +150,15 @@ void DBTest::run()
         rocksdb::Slice end(LocationHandler::MAX_KEY);
         std::vector<rocksdb::Iterator*> iters;
         db_->NewIterators(rocksdb::ReadOptions(), handles_, &iters);
-        int deleteCount = 0;
         for(auto iter : iters) {
+            int deleteCount = 0;
             for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
                 db_->Delete(rocksdb::WriteOptions(), iter->key());
                 deleteCount++;
             }
-            std::cout << deleteCount << " entries were deleted." << std::endl;
+            if(setting_.verbose) {
+                std::cout << deleteCount << " entries were deleted." << std::endl;
+            }
             if (!iter->status().ok()) {
                   std::cerr << "DELETE failed. " << iter->status().ToString() << std::endl;
             }
