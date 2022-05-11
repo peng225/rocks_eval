@@ -37,7 +37,7 @@ typedef struct TestSetting
     // Table settings
     int numKeyGroup = 1;
     int numEntryPerKeyGroup = 1000;
-    int valueLength = 32;
+    int valueLength = 64;
     IOPattern writePattern = IOPattern::RANDOM;
     //TODO:  How about ReadPattern?
 } TestSetting;

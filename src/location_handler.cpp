@@ -14,14 +14,14 @@ LocationHandler::LocationHandler(const TestSetting &setting) :
 std::string LocationHandler::getKeyPrefix(int kg)
 {
     std::stringstream keyPrefix;
-    keyPrefix << "key" << std::setfill('0') << std::setw(5) << kg << "/";
+    keyPrefix << "key" << std::setfill('0') << std::setw(4) << kg << "/";
     return keyPrefix.str();
 }
 
 std::shared_ptr<Location> LocationHandler::getNextLocation()
 {
     std::stringstream key;
-    key << "key" << std::setfill('0') << std::setw(5) << currentKg_ << "/"
+    key << "key" << std::setfill('0') << std::setw(4) << currentKg_ << "/"
         << std::setw(12) << numEntryInKg_;
     int cfNum = currentKg_ % setting_.numColumnFamily;
 
