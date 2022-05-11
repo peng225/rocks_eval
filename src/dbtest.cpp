@@ -37,7 +37,9 @@ void DBTest::setUp()
             getCfName(cfNum), cfopt));
     }
 
-    auto s = rocksdb::DB::Open(rocksdb::DBOptions(), setting_.dbPath,
+    rocksdb::DBOptions dbOption;
+    dbOption.create_if_missing = true;
+    auto s = rocksdb::DB::Open(dbOption, setting_.dbPath,
                                 columnFamilies, &handles_, &db_);
     if (!s.ok())
     {
