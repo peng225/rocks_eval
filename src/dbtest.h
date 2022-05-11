@@ -22,6 +22,7 @@ private:
     std::string getCfName(int cfNum);
     void generateLocations(std::vector<Location> &locations);
     void generateValue(std::string &value);
+    void createColomnFamily(const rocksdb::ColumnFamilyOptions& cfopt);
 };
 
 #endif // DBTEST_H

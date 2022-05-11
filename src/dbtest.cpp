@@ -24,17 +24,21 @@ void DBTest::setUp()
         cfopt.max_bytes_for_level_multiplier = 2;
         cfopt.num_levels = 4;
     }
+
+    if(setting_.numColumnFamily > 1 && setting_.clearOnStart) {
+        createColomnFamily(cfopt);
+    }
+
     columnFamilies.emplace_back(rocksdb::ColumnFamilyDescriptor(
         rocksdb::kDefaultColumnFamilyName, cfopt));
-    for (int cfNum = 0; cfNum < setting_.numColumnFamily - 1; cfNum++)
+    for (int cfNum = 1; cfNum < setting_.numColumnFamily; cfNum++)
     {
         columnFamilies.emplace_back(rocksdb::ColumnFamilyDescriptor(
             getCfName(cfNum), cfopt));
     }
 
-    rocksdb::Options options;
-    options.create_if_missing = true;
-    rocksdb::Status s = rocksdb::DB::Open(options, setting_.dbPath, columnFamilies, &handles_, &db_);
+    auto s = rocksdb::DB::Open(rocksdb::DBOptions(), setting_.dbPath,
+                                columnFamilies, &handles_, &db_);
     if (!s.ok())
     {
         std::cerr << s.ToString() << std::endl;
@@ -44,16 +48,6 @@ void DBTest::setUp()
 
 void DBTest::cleanUp()
 {
-    // i==0 is default column family
-    for (int i = 1; i < static_cast<int>(handles_.size()); i++)
-    {
-        auto s = db_->DropColumnFamily(handles_[i]);
-        if (!s.ok())
-        {
-            std::cerr << s.ToString() << std::endl;
-            exit(1);
-        }
-    }
     for (auto handle : handles_)
     {
         auto s = db_->DestroyColumnFamilyHandle(handle);
@@ -193,4 +187,38 @@ void DBTest::generateValue(std::string &value)
     {
         value += static_cast<char>(mt_() % 26 + static_cast<int>('a'));
     }
+}
+
+void DBTest::createColomnFamily(const rocksdb::ColumnFamilyOptions& cfopt)
+{
+    rocksdb::Options options;
+    options.create_if_missing = true;
+    rocksdb::DB* db;
+    rocksdb::Status s = rocksdb::DB::Open(options, setting_.dbPath, &db);
+    if (!s.ok())
+    {
+        std::cerr << s.ToString() << std::endl;
+        exit(1);
+    }
+
+    handles_.resize(setting_.numColumnFamily);
+    for (int cfNum = 1; cfNum < setting_.numColumnFamily; cfNum++)
+    {
+        rocksdb::ColumnFamilyHandle* cf;
+        rocksdb::Status s = db->CreateColumnFamily(cfopt, getCfName(cfNum), &cf);
+        if (!s.ok())
+        {
+            std::cerr << s.ToString() << std::endl;
+            exit(1);
+        }
+
+        s = db->DestroyColumnFamilyHandle(cf);
+        if (!s.ok())
+        {
+            std::cerr << s.ToString() << std::endl;
+            exit(1);
+        }
+        std::cout << "created column family " << getCfName(cfNum) << std::endl;
+    }
+    delete db;
 }
