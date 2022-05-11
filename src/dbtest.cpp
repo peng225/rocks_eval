@@ -177,7 +177,7 @@ void DBTest::run()
     auto end = std::chrono::system_clock::now();
     std::cout << "Operation " << setting_.operation << " finished." << std::endl;
     double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "elapsed time: " << elapsed/1000.0 << "[ms]" << std::endl;
+    std::cout << "elapsed time: " << elapsed/1000.0 << "[s]" << std::endl;
 }
 
 std::string DBTest::getCfName(int cfNum)
