@@ -111,7 +111,8 @@ void DBTest::run()
         rocksdb::ReadOptions read_options;
         read_options.total_order_seek = false;
         read_options.auto_prefix_mode = false;
-        rocksdb::Iterator* iter = db_->NewIterator(read_options);
+        std::vector<rocksdb::Iterator*> iters;
+        db_->NewIterators(read_options, handles_, &iters);
         /* The reason why the following loop is executed
            for `setting_.numEntryPerKeyGroup` times is not so meaningful,
            but just to do the same amount of operations
@@ -119,8 +120,10 @@ void DBTest::run()
         */
         for(int i = 0; i < setting_.numEntryPerKeyGroup; i++)
         {
+            rocksdb::Iterator* iter;
             for (int kg = 0; kg < setting_.numKeyGroup; kg++)
             {
+                iter = iters.at(kg % setting_.numColumnFamily);
                 iter->Seek(lh->getKeyPrefix(kg));
             }
             if(!iter->Valid()) {
@@ -128,8 +131,9 @@ void DBTest::run()
                 exit(1);
             }
         }
-        // std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
-        delete iter;
+        for(auto iter : iters) {
+            delete iter;
+        }
         break;
     }
     case Operation::DELETE:
