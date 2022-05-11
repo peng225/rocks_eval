@@ -168,7 +168,7 @@ void DBTest::run()
     {
         rocksdb::Slice begin(LocationHandler::MIN_KEY);
         rocksdb::Slice end(LocationHandler::MAX_KEY);
-        for(auto &handle : handles_) {
+        for(auto handle : handles_) {
             s = db_->DeleteRange(rocksdb::WriteOptions(), handle, begin, end);
             if (!s.ok())
             {
@@ -181,7 +181,14 @@ void DBTest::run()
     case Operation::COMPACTION:
     {
         rocksdb::CompactRangeOptions cropt;
-        s = db_->CompactRange(cropt, nullptr, nullptr);
+        for(auto handle : handles_) {
+            s = db_->CompactRange(cropt, handle, nullptr, nullptr);
+            if (!s.ok())
+            {
+                std::cerr << s.ToString() << std::endl;
+                exit(1);
+            }
+        }
         break;
     }
     default:
