@@ -13,7 +13,7 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     ("operation,o", boost::program_options::value<std::string>(), "The operation to be executed.")
     ("numcf", boost::program_options::value<int>(), "The number of column families.")
     ("numkg", boost::program_options::value<int>(), "The number of key groups.")
-    ("clear_on_start", "Clear on start.")
+    ("clear_on_start,c", "Clear on start.")
     ("allow_not_found", "Allow 'not found' error on read.")
     ("small_set", "Use small rocksdb settings.");
     // TODO: set writePattern
@@ -69,7 +69,7 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
             {"prefix_seek", Operation::PREFIX_SEEK},
             {"delete", Operation::DELETE},
             {"delete_range", Operation::DELETE_RANGE},
-            {"compaction", Operation::COMPACTION}};
+            {"compact", Operation::COMPACTION}};
         std::string ope;
         try
         {
