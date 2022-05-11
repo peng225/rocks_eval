@@ -15,6 +15,7 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     ("numkg", boost::program_options::value<int>(), "The number of key groups.")
     ("clear_on_start,c", "Clear on start.")
     ("allow_not_found", "Allow 'not found' error on read.")
+    ("verbose,v", "Verbose.")
     ("small_set", "Use small rocksdb settings.");
     // TODO: set writePattern
     boost::program_options::variables_map vm;
@@ -130,5 +131,10 @@ void parseArgs(int argc, char **argv, TestSetting &setting)
     if (vm.count("small_set"))
     {
         setting.smallSet = true;
+    }
+
+    if (vm.count("verbose"))
+    {
+        setting.verbose = true;
     }
 }

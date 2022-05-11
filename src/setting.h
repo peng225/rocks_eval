@@ -32,6 +32,7 @@ typedef struct TestSetting
     bool clearOnStart = false;
     bool allowNotFound = false;
     Operation operation = Operation::WRITE;
+    bool verbose = false;
 
     // Table settings
     int numKeyGroup = 1;

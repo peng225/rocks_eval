@@ -94,6 +94,9 @@ void DBTest::run()
         for(auto iter : iters) {
             for(iter->Seek(nullptr); iter->Valid(); iter->Next()) {
                 volatile auto val = iter->value();
+                if(setting_.verbose) {
+                    std::cout << "key = " << iter->key().ToString() << ", value = " << val.data_ << std::endl;
+                }
                 readCount++;
             }
             std::cout << readCount << " entries were read." << std::endl;
@@ -125,6 +128,9 @@ void DBTest::run()
             {
                 iter = iters.at(kg % setting_.numColumnFamily);
                 iter->Seek(lh->getKeyPrefix(kg));
+                if(setting_.verbose) {
+                    std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
+                }
             }
             if(!iter->Valid()) {
                 std::cerr << "The iterator is not valid." << std::endl;
