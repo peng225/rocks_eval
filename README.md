@@ -8,6 +8,7 @@ The programs in this reopository is tested on Ubuntu Linux only.
 
 The following packages should be installed in advance.
 
+- cmake
 - g++
 - libboost-program-options-dev
 - libgflags-dev
