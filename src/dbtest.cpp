@@ -110,13 +110,21 @@ void DBTest::run()
         read_options.total_order_seek = false;
         read_options.auto_prefix_mode = false;
         rocksdb::Iterator* iter = db_->NewIterator(read_options);
-        for (int kg = 0; kg < setting_.numKeyGroup; kg++)
+        /* The reason why the following loop is executed
+           for `setting_.numEntryPerKeyGroup` times is not so meaningful,
+           but just to do the same amount of operations
+           with the `Operation::READ` case.
+        */
+        for(int i = 0; i < setting_.numEntryPerKeyGroup; i++)
         {
-            iter->Seek(lh->getKeyPrefix(kg));
-        }
-        if(!iter->Valid()) {
-            std::cerr << "The iterator is not valid." << std::endl;
-            exit(1);
+            for (int kg = 0; kg < setting_.numKeyGroup; kg++)
+            {
+                iter->Seek(lh->getKeyPrefix(kg));
+            }
+            if(!iter->Valid()) {
+                std::cerr << "The iterator is not valid." << std::endl;
+                exit(1);
+            }
         }
         // std::cout << "key = " << iter->key().ToString() << ", value = " << iter->value().ToString() << std::endl;
         delete iter;
